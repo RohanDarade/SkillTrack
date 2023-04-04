@@ -1,64 +1,78 @@
-import React, { useRef, useState } from "react"
-import { Form, Button, Card, Alert } from "react-bootstrap"
-import { useAuth } from "../context/AuthContext"
-import { Link, useNavigate } from "react-router-dom"
+import React, {useState} from "react";
+import { Navigate } from "react-router-dom";
+import firebaseApp from "./firebase";
+import TextField from "@mui/material/TextField";
 
-export default function Signup() {
-  const emailRef = useRef()
-  const passwordRef = useRef()
-  const passwordConfirmRef = useRef()
-  const { signup } = useAuth()
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
-
-  async function handleSubmit(e) {
-    e.preventDefault()
-
-    if (passwordRef.current.value !== passwordConfirmRef.current.value) {
-      return setError("Passwords do not match")
-    }
-
+const Signup = () => {
+  const [currentUser, setCurrentUser] = useState(null);    
+  const handleSubmit = (e) => {
+    e.preventDefault();    
+    const { email, password } = e.target.elements;
     try {
-      setError("")
-      setLoading(true)
-      await signup(emailRef.current.value, passwordRef.current.value)
-      navigate.push("/")
-    } catch {
-      setError("Failed to create an account")
+      firebaseApp.auth().createUserWithEmailAndPassword(email.value, password.value);      
+      setCurrentUser(true);
+    } catch (error) {
+      alert(error);
     }
-
-    setLoading(false)
+  };
+  if (currentUser) {
+      return <Navigate to="/dashboard" />;
   }
-
   return (
-    <>
-      <Card>
-        <Card.Body>
-          <h2 className="text-center mb-4">Sign Up</h2>
-          {error && <Alert variant="danger">{error}</Alert>}
-          <Form onSubmit={handleSubmit}>
-            <Form.Group id="email">
-              <Form.Label>Email</Form.Label>
-              <Form.Control type="email" ref={emailRef} required />
-            </Form.Group>
-            <Form.Group id="password">
-              <Form.Label>Password</Form.Label>
-              <Form.Control type="password" ref={passwordRef} required />
-            </Form.Group>
-            <Form.Group id="password-confirm">
-              <Form.Label>Password Confirmation</Form.Label>
-              <Form.Control type="password" ref={passwordConfirmRef} required />
-            </Form.Group>
-            <Button disabled={loading} className="w-100" type="submit">
-              Sign Up
-            </Button>
-          </Form>
-        </Card.Body>
-      </Card>
-      <div className="w-100 text-center mt-2">
-        Already have an account? <Link to="/login">Log In</Link>
-      </div>
-    </>
-  )
-}
+    <div>
+    <div className="flex justify-center items-center h-screen flex-col">
+
+      <h1>Sign Up</h1>
+      <form onSubmit={handleSubmit} className="m-4 flex flex-col w-1/4 min-w-[300px]">
+      <div className="grid grid-cols-2 gap-4">
+          <TextField
+            required
+            id="outlined-required"
+            label="First Name"
+            name="firstName"
+            className="grid-col-1"
+          />
+          <TextField
+            required
+            id="outlined-required"
+            label="Last Name"
+            name="lastName"
+            className="grid-col-2"
+          />
+          <div className="col-span-2">
+            <TextField
+              required
+              fullWidth
+              id="outlined-required"
+              label="Email"
+              name="email"
+
+            />
+          </div>
+          <div className="col-span-2">
+            <TextField
+              required
+              fullWidth
+              type="password"
+              id="outlined-required"
+              label="Password"
+              name="password"
+
+            />
+          </div>
+        </div>
+{/* 
+        <label for="email">Email</label>
+        <input type="email" name="email" placeholder="Email" />
+        <label for="password">Password</label>
+        <input type="password" name="password" placeholder="Password" /> */}
+        <button type="submit" className="p-[10px] mt-4 text-white rounded-[4px] bg-[#1989F1]">Submit</button>
+      </form>
+    </div>
+    </div>
+  );
+};
+
+export default Signup;
+
+
